@@ -18,7 +18,7 @@ pub fn compile<'grammar,W:Write>(
     grammar: &'grammar Grammar,
     user_start_symbol: NonterminalString,
     start_symbol: NonterminalString,
-    states: &[State<'grammar>],
+    states: &[LR1State<'grammar>],
     out: &mut RustWrite<W>)
     -> io::Result<()>
 {
@@ -43,7 +43,7 @@ struct RecursiveAscent<'ascent,'grammar:'ascent,W:Write+'ascent> {
     start_symbol: NonterminalString,
 
     /// the vector of states
-    states: &'ascent [State<'grammar>],
+    states: &'ascent [LR1State<'grammar>],
 
     /// for each state, the maximal prefix of tokens on the stack;
     /// this is the number of arguments that the state fn expects
@@ -60,7 +60,7 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
     fn new(grammar: &'grammar Grammar,
            user_start_symbol: NonterminalString,
            start_symbol: NonterminalString,
-           states: &'ascent [State<'grammar>],
+           states: &'ascent [LR1State<'grammar>],
            out: &'ascent mut RustWrite<W>)
            -> RecursiveAscent<'ascent,'grammar,W>
     {
