@@ -8,7 +8,7 @@ use grammar::repr::{Grammar,
                     Symbol,
                     TerminalString, TypeParameter, TypeRepr, Types};
 use lr1::core::*;
-use lr1::lookahead::Lookahead;
+use lr1::lookahead::Token;
 use rust::RustWrite;
 use std::io::{self, Write};
 use tls::Tls;
@@ -319,11 +319,11 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
                              .filter_map(|(token, action)| action.shift().map(|n| (token, n)))
         {
             match *token {
-                Lookahead::Terminal(s) => {
+                Token::Terminal(s) => {
                     let sym_name = format!("{}sym{}", self.prefix, this_prefix.len());
                     try!(self.consume_terminal(s, sym_name));
                 }
-                Lookahead::EOF =>
+                Token::EOF =>
                     unreachable!("should never have to shift EOF")
             }
 
@@ -346,8 +346,8 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
         for (production, tokens) in reductions {
             for (index, &token) in tokens.iter().enumerate() {
                 let pattern = match token {
-                    Lookahead::Terminal(s) => format!("Some({})", self.match_terminal_pattern(s)),
-                    Lookahead::EOF => format!("None"),
+                    Token::Terminal(s) => format!("Some({})", self.match_terminal_pattern(s)),
+                    Token::EOF => format!("None"),
                 };
                 if index < tokens.len() - 1 {
                     rust!(self.out, "{} |", pattern);
