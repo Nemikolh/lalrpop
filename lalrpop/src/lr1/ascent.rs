@@ -253,7 +253,10 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
                 rust!(self.out, "//   {:?}", item);
             }
             rust!(self.out, "//");
-            for (token, action) in &this_state.tokens {
+            for (terminal, action) in &this_state.shifts {
+                rust!(self.out, "//   {:?} -> {:?}", terminal, action);
+            }
+            for (token, action) in &this_state.reductions {
                 rust!(self.out, "//   {:?} -> {:?}", token, action);
             }
             rust!(self.out, "//");
@@ -314,18 +317,9 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
         rust!(self.out, "match {}lookahead {{", self.prefix);
 
         // first emit shifts:
-        for (token, next_index) in
-            this_state.tokens.iter()
-                             .filter_map(|(token, action)| action.shift().map(|n| (token, n)))
-        {
-            match *token {
-                Token::Terminal(s) => {
-                    let sym_name = format!("{}sym{}", self.prefix, this_prefix.len());
-                    try!(self.consume_terminal(s, sym_name));
-                }
-                Token::EOF =>
-                    unreachable!("should never have to shift EOF")
-            }
+        for (&terminal, &next_index) in &this_state.shifts {
+            let sym_name = format!("{}sym{}", self.prefix, this_prefix.len());
+            try!(self.consume_terminal(terminal, sym_name));
 
             // transition to the new state
             let transition =
@@ -340,9 +334,9 @@ impl<'ascent,'grammar,W:Write> RecursiveAscent<'ascent,'grammar,W> {
         // trigger the same reduction, so group these by the
         // production that we are going to be reducing.
         let reductions: Multimap<_, Vec<_>> =
-            this_state.tokens.iter()
-                             .filter_map(|(&token, action)| action.reduce().map(|p| (p, token)))
-                             .collect();
+            this_state.reductions.iter()
+                                 .map(|(&token, &production)| (production, token))
+                                 .collect();
         for (production, tokens) in reductions {
             for (index, &token) in tokens.iter().enumerate() {
                 let pattern = match token {
