@@ -54,6 +54,9 @@ mod error;
 /// test for inlining expansion issue #55
 mod issue_55;
 
+/// test for unit action code
+mod unit;
+
 mod util;
 
 /// This constant is here so that some of the generator parsers can
@@ -261,3 +264,8 @@ fn issue_55_test1() {
     assert_eq!(c, vec!["X", "Y"]);
 }
 
+#[test]
+fn unit_test1() {
+    assert!(unit::parse_Expr("3 + 4 * 5").is_ok());
+    assert!(unit::parse_Expr("3 + +").is_err());
+}
