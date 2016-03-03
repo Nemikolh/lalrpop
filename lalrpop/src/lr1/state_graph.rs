@@ -76,4 +76,15 @@ impl StateGraph {
         result.dedup();
         result
     }
+
+    pub fn predecessors(&self,
+                        state_index: StateIndex,
+                        symbol: Symbol)
+                        -> Vec<StateIndex> {
+        self.graph.edges_directed(NodeIndex::new(state_index.0),
+                                  EdgeDirection::Incoming)
+                  .filter(|&(_, s)| *s == symbol)
+                  .map(|(pred, _)| StateIndex(pred.index()))
+                  .collect()
+    }
 }
