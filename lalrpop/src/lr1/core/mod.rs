@@ -116,7 +116,7 @@ pub type LR1State<'grammar> = State<'grammar, Token>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Action<'grammar> {
-    Shift(StateIndex),
+    Shift(TerminalString, StateIndex),
     Reduce(&'grammar Production),
 }
 
